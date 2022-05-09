@@ -1,0 +1,84 @@
+name: release
+
+on:
+  push:
+    # Sequence of patterns matched against refs/tags
+    tags:
+    - 'v*' # Push events to matching v*, i.e. v1.0, v20.15.10
+
+jobs:
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-go@v3
+        with:
+          go-version: '>=1.18.0'
+
+      - run: |
+          env GOOS=linux GOARCH=amd64   go build -o bin/linux-amd64/k8s-create ./cmd/k8s-create
+          env GOOS=linux GOARCH=amd64   go build -o bin/linux-amd64/k8s-list ./cmd/k8s-list
+          env GOOS=linux GOARCH=amd64   go build -o bin/linux-amd64/storage-kafka ./cmd/storage-kafka
+          env GOOS=linux GOARCH=amd64   go build -o bin/linux-amd64/storage-postgres ./cmd/storage-postgres
+
+      - run: |
+          env GOOS=darwin GOARCH=amd64  go build -o bin/mac-amd64/k8s-create ./cmd/k8s-create
+          env GOOS=darwin GOARCH=amd64  go build -o bin/mac-amd64/k8s-list ./cmd/k8s-list
+          env GOOS=darwin GOARCH=amd64  go build -o bin/mac-amd64/storage-kafka ./cmd/storage-kafka
+          env GOOS=darwin GOARCH=amd64  go build -o bin/mac-amd64/storage-postgres ./cmd/storage-postgres
+
+      - run: |
+          env GOOS=windows GOARCH=amd64  go build -o bin/win-amd64/k8s-create ./cmd/k8s-create
+          env GOOS=windows GOARCH=amd64  go build -o bin/win-amd64/k8s-list ./cmd/k8s-list
+          env GOOS=windows GOARCH=amd64  go build -o bin/win-amd64/storage-kafka ./cmd/storage-kafka
+          env GOOS=windows GOARCH=amd64  go build -o bin/win-amd64/storage-postgres ./cmd/storage-postgres
+
+      - run: |
+          zip toolbx-commands-${{github.ref}}-linux-amd64.zip bin/linux-amd64/*
+          zip toolbx-commands-${{github.ref}}-mac-amd64.zip bin/mac-amd64/*
+          zip toolbx-commands-${{github.ref}}-win-amd64.zip bin/win-amd64/*
+
+      - name: Create Release
+        id: create_release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ github.ref }}
+          release_name: Release ${{ github.ref }}
+          draft: false
+          prerelease: false
+
+      - name: Upload linux archive
+        id: upload-linux-archive
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }} 
+          asset_path: ./toolbx-commands-${{github.ref}}-linux-amd64.zip
+          asset_name: ./toolbx-commands-${{github.ref}}-linux-amd64.zip
+          asset_content_type: application/zip
+
+      - name: Upload mac archive
+        id: upload-mac-archive
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }} 
+          asset_path: ./toolbx-commands-${{github.ref}}-mac-amd64.zip
+          asset_name: ./toolbx-commands-${{github.ref}}-mac-amd64.zip
+          asset_content_type: application/zip           
+
+      - name: Upload win archive
+        id: upload-win-archive
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }} 
+          asset_path: ./toolbx-commands-${{github.ref}}-win-amd64.zip
+          asset_name: ./toolbx-commands-${{github.ref}}-win-amd64.zip
+          asset_content_type: application/zip                      
