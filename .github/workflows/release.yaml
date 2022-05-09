@@ -59,7 +59,7 @@ jobs:
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }} 
           asset_path: ./toolbx-commands-${{github.ref_name}}-linux-amd64.zip
-          asset_name: ./toolbx-commands-${{github.ref_name}}-linux-amd64.zip
+          asset_name: toolbx-commands-${{github.ref_name}}-linux-amd64.zip
           asset_content_type: application/zip
 
       - name: Upload mac archive
@@ -70,7 +70,7 @@ jobs:
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }} 
           asset_path: ./toolbx-commands-${{github.ref_name}}-mac-amd64.zip
-          asset_name: ./toolbx-commands-${{github.ref_name}}-mac-amd64.zip
+          asset_name: toolbx-commands-${{github.ref_name}}-mac-amd64.zip
           asset_content_type: application/zip           
 
       - name: Upload win archive
@@ -81,5 +81,5 @@ jobs:
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }} 
           asset_path: ./toolbx-commands-${{github.ref_name}}-win-amd64.zip
-          asset_name: ./toolbx-commands-${{github.ref_name}}-win-amd64.zip
+          asset_name: toolbx-commands-${{github.ref_name}}-win-amd64.zip
           asset_content_type: application/zip                      
